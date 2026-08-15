@@ -1,0 +1,23 @@
+{
+  "name": "api_automation_with_responsevalidator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parthiv2806/Api_Automation_with_responsevalidator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/parthiv2806/Api_Automation_with_responsevalidator/issues"
+  },
+  "homepage": "https://github.com/parthiv2806/Api_Automation_with_responsevalidator#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0"
+  }
+}
