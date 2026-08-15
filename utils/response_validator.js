@@ -13,6 +13,10 @@ export function validateProperty(body, property) {
 export function validateBody(body, property) {
   expect(body).toMatchObject(property);
 }
+
+export function validateTextBody(body, expectedBody) {
+  expect(body).toBe(expectedBody);
+}
 // export function Validate
 
 // Status   → API successful hai?

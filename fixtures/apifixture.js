@@ -4,6 +4,8 @@ import { Lofin_Function } from "../services/loginservices";
 import { Login } from "../payloads/loginpayload";
 import { setToken } from "../utils/tokenmanager";
 import { getToken } from "../utils/tokenmanager";
+import { Create_booking } from "../services/createbooking_service";
+import { CreateBooking } from "../payloads/createbooking_payload";
 export const test = base.extend({
   // Initialize API client once per worker
   apiClient: [
@@ -45,7 +47,7 @@ export const test = base.extend({
       const response = await Create_booking(CreateBooking);
 
       const body = await response.json();
-
+      console.log(body);
       const bookingid = body.bookingid;
 
       console.log("Created Booking ID:", bookingid);
@@ -57,7 +59,6 @@ export const test = base.extend({
       await use({
         response,
         body,
-
         bookingid,
       });
     },
