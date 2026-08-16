@@ -15,3 +15,29 @@ export async function post(url, payload) {
     data: payload,
   });
 }
+
+export async function patch(url, payload, token) {
+  return await apicontext.patch(url, {
+    data: payload,
+    headers: {
+      Cookie: `token=${token}`,
+    },
+  });
+}
+
+export async function put(url, payload, token) {
+  return await apicontext.put(url, {
+    data: payload,
+    headers: {
+      Cookie: `token=${token}`,
+    },
+  });
+}
+
+export async function remove(url, token) {
+  return await apicontext.delete(url, {
+    headers: {
+      Cookie: `token=${token}`,
+    },
+  });
+}
