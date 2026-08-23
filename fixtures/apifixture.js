@@ -3,7 +3,7 @@ import { initApiClient } from "../utils/apiclients";
 import { Lofin_Function } from "../services/loginservices";
 import { Login } from "../payloads/loginpayload";
 import { setToken } from "../utils/tokenmanager";
-import { getToken } from "../utils/tokenmanager";
+// import { getToken } from "../utils/tokenmanager";
 import { Create_booking } from "../services/createbooking_service";
 import { CreateBooking } from "../payloads/createbooking_payload";
 export const test = base.extend({
@@ -31,16 +31,14 @@ export const test = base.extend({
     },
     { scope: "worker" },
   ],
-  token: [
-    async ({ auth }, use) => {
-      const token = getToken();
-
-      console.log(" Token:", token);
-
-      await use(token);
-    },
-    { scope: "worker" },
-  ],
+  // token: [
+  //   async ({ auth }, use) => {
+  //     const token = getToken();
+  //     console.log(" Token:", token);
+  //     await use(token);
+  //   },
+  //   { scope: "worker" },
+  // ],
 
   booking: [
     async ({ apiClient }, use) => {

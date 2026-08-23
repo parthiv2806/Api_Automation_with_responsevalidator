@@ -8,11 +8,10 @@ import {
   validateTruthy,
 } from "../utils/response_validator";
 
-test("Partial update", async ({ booking, token }) => {
+test("Partial update", async ({ booking }) => {
   const response = await Partil_update(
     Partial_update,
     booking.bookingid,
-    token,
   );
 
   const body = await response.json();

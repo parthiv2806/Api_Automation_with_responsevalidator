@@ -10,12 +10,11 @@ import {
 } from "../utils/response_validator";
 
 
-test("Full update", async ({ booking, token }) => {
+test("Full update", async ({ booking }) => {
 
     const response = await Full_update(
         PutBooking,
-        booking.bookingid,
-        token
+        booking.bookingid
     );
 
     validateStatus(response, 200);

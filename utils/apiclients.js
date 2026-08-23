@@ -1,9 +1,14 @@
 import { request } from "@playwright/test";
+import fs from "fs";
+
+const AUTH_FILE = "playwright/.auth/user.json";
 
 let apicontext = null;
 
 export async function initApiClient() {
-  apicontext = await request.newContext();
+  apicontext = await request.newContext({
+    storageState: fs.existsSync(AUTH_FILE) ? AUTH_FILE : undefined,
+  });
 }
 
 export async function get(url) {
@@ -16,28 +21,18 @@ export async function post(url, payload) {
   });
 }
 
-export async function patch(url, payload, token) {
+export async function patch(url, payload) {
   return await apicontext.patch(url, {
     data: payload,
-    headers: {
-      Cookie: `token=${token}`,
-    },
   });
 }
 
-export async function put(url, payload, token) {
+export async function put(url, payload) {
   return await apicontext.put(url, {
     data: payload,
-    headers: {
-      Cookie: `token=${token}`,
-    },
   });
 }
 
-export async function remove(url, token) {
-  return await apicontext.delete(url, {
-    headers: {
-      Cookie: `token=${token}`,
-    },
-  });
+export async function remove(url) {
+  return await apicontext.delete(url);
 }

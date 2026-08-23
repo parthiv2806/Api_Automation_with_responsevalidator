@@ -36,7 +36,7 @@ Every API response is validated for:
 .
 ├── .github/workflows/playwright.yml   # GitHub Actions CI pipeline
 ├── fixtures/
-│   └── apifixture.js                  # Reusable fixtures (apiClient, auth, token, booking)
+│   └── apifixture.js                  # Reusable fixtures (apiClient, auth, booking)
 ├── payloads/
 │   ├── loginpayload.js                # Login + negative login payloads
 │   ├── createbooking_payload.js       # Valid + 15 negative create payloads
@@ -50,6 +50,7 @@ Every API response is validated for:
 │   ├── fullupdate._service.js
 │   └── delete_service.js
 ├── tests/                             # Test specs (numbered = execution order)
+│   ├── auth.setup.js                  # Login setup project (saves storageState)
 │   ├── 1_login.spec.js
 │   ├── 2_createbooking.spec.js
 │   ├── 3_getbooking.spec.js
@@ -69,9 +70,8 @@ Every API response is validated for:
 ## Architecture / Flow
 
 1. **Fixtures** (`fixtures/apifixture.js`) create reusable state:
-   - `apiClient` – initializes one Playwright request context per worker.
-   - `auth` – logs in and stores the token.
-   - `token` – exposes the stored token (used for PATCH/PUT/DELETE via `Cookie: token=...`).
+   - `apiClient` – initializes one Playwright request context per worker (with storageState).
+   - `auth` – logs in and returns the response/body (used by login tests).
    - `booking` – creates one booking (worker-scoped) and exposes `{ response, body, bookingid }` so **the same booking ID is reused** by get → patch → put → delete.
 
 2. **Services** map 1:1 to API endpoints and call the HTTP wrapper.
@@ -84,6 +84,7 @@ Every API response is validated for:
 
 | Order | File                     | Operation   | Endpoint                     |
 |-------|--------------------------|-------------|------------------------------|
+| 0     | `auth.setup.js`          | Login (storageState save) | `POST /auth`   |
 | 1     | `1_login.spec.js`        | Login       | `POST /auth`                 |
 | 2     | `2_createbooking.spec.js`| Create      | `POST /booking`              |
 | 3     | `3_getbooking.spec.js`   | Get         | `GET /booking/:id`           |
@@ -92,6 +93,52 @@ Every API response is validated for:
 | 6     | `6_delete.spec.js`       | Delete      | `DELETE /booking/:id`        |
 
 Order is enforced with **numbered file prefixes** + `workers: 1` + `fullyParallel: false` in `playwright.config.js`.
+
+---
+
+## Authentication with storageState ⭐
+
+Is project me **Playwright ka storageState** use kiya hai - login **ek baar** hota hai, token file me save hota hai, aur har authenticated request me automatic attach hota hai.
+
+### Producer → Consumer flow
+
+```
+auth.setup.js (PRODUCER)
+┌────────────────────────────────────────────────┐
+│ 1. POST /auth (login)                          │
+│ 2. Response se token nikala                    │
+│    { "token": "4f6067f1cd21415" }              │
+│ 3. playwright/.auth/user.json me cookie ki     │
+│    form me likh diya 💾                        │
+└────────────────────────────────────────────────┘
+                 ↓
+apiclients.js + tests (CONSUMERS)
+┌────────────────────────────────────────────────┐
+│ user.json padhta hai → har request context     │
+│ isi storageState se banta hai → PATCH / PUT /  │
+│ DELETE me Cookie header AUTOMATIC attach       │
+└────────────────────────────────────────────────┘
+```
+
+### Kaise kaam karta hai (`tests/auth.setup.js`)
+
+1. Setup project `POST /auth` call karke token leta hai.
+2. Token ko cookie (`token=<value>`) ki tarah `playwright/.auth/user.json` me save karta hai.
+   - Token **hardcoded nahi** hai - har run pe API se fresh aata hai aur file overwrite hoti hai.
+   - restful-booker token JSON body me deta hai (Set-Cookie header se nahi), isliye storageState file manually construct karni padti hai.
+3. `chromium` project `dependencies: ["setup"]` ke through setup pe depend karta hai - to har full run se pehle fresh login + fresh token guarantee hai.
+4. `utils/apiclients.js` bhi har request context ko isi storageState se banata hai (`storageState: AUTH_FILE`), isliye PATCH/PUT/DELETE services/specs me **token pass karne ki zaroorat nahi** - purane approach me har function ko `token` param chahiye tha.
+
+### Kyu better hai
+
+| | Pehle (manual token) | Ab (storageState) |
+|---|---|---|
+| Token passing | har service/spec me manually | ek baar, automatic |
+| Token storage | sirf RAM me | disk par reusable file |
+| Naya test likhna | token wiring yaad rakhni padti | bas service call karo |
+| Pattern | ad-hoc | Playwright docs ka recommended auth pattern |
+
+`.gitignore` me `/playwright/.auth/` already ignored hai, isliye token kabhi git me commit nahi hoga.
 
 ---
 
@@ -167,5 +214,5 @@ Reports are generated in `playwright-report/` (HTML).
 ## Demo API Note
 
 - Base URL: `https://restful-booker.herokuapp.com`
-- Auth: `POST /auth` returns a token used as `Cookie: token=<token>` for PATCH/PUT/DELETE.
+- Auth: `POST /auth` returns a token; it is saved as a cookie in `playwright/.auth/user.json` (storageState) and reused for PATCH/PUT/DELETE.
 - **Data is purged every ~10 minutes** – the server is shared by all users and data is not persistent.
