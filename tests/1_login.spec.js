@@ -19,12 +19,10 @@ import { Lofin_Function } from "../services/loginservices";
 // import { initApiClient } from "../utils/apiclients";
 // import { Lofin_Function } from "../services/loginservices";
 // import { Login } from "../payloads/loginpayload";
-// import { setToken } from "../utils/tokenmanager";
 test("Login Test case", async ({ auth }) => {
   // const response = await Lofin_Function(Login);
   // const body = await response.json();
   // console.log(body);
-  // setToken(body.token);
   // console.log("Token:", body.token);
 
   // expect(auth.response.status()).toBe(200);

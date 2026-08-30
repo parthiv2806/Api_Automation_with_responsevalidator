@@ -58,9 +58,8 @@ Every API response is validated for:
 │   ├── 5_fullupdate.spec.js
 │   └── 6_delete.spec.js
 ├── utils/
-│   ├── apiclients.js                  # HTTP wrapper (get/post/patch/put/delete)
-│   ├── response_validator.js          # Central assertion/validation functions
-│   └── tokenmanager.js                # In-memory token storage
+│   ├── apiclients.js                  # HTTP wrapper (storageState context)
+│   └── response_validator.js          # Central assertion functions
 ├── playwright.config.js               # Playwright config (sequential, 1 worker)
 └── package.json
 ```
